@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Andina Admin — Panel de gestión</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C29B66; --gold-light: #C5B197; --cream: #F6E1C3;
+    --dark: #131313; --dark-2: #1E2426; --dark-3: #252E30;
+    --dark-4: #31393B; --silver: #DCDCDE; --bg: #0E1214;
+    --danger: #c0392b; --success: #27ae60;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--silver); font-family:'Jost',sans-serif; font-weight:300; min-height:100vh; }
+
+  /* ── LOGIN ── */
+  .login-screen {
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    background:var(--bg); position:relative; overflow:hidden;
+  }
+  .login-screen::before {
+    content:''; position:absolute; top:-20%; right:-10%; width:60vw; height:120vh;
+    border-left:1px solid rgba(194,155,102,0.07); border-bottom:1px solid rgba(194,155,102,0.05);
+    transform:rotate(-15deg); pointer-events:none;
+  }
+  .login-box {
+    background:var(--dark-2); border:1px solid rgba(194,155,102,0.15);
+    padding:56px 48px; width:100%; max-width:420px; position:relative; z-index:1;
+    animation:fadeUp 0.6s ease forwards;
+  }
+  .login-logo { display:flex; align-items:center; gap:12px; margin-bottom:40px; }
+  .login-logo svg { width:32px; height:32px; }
+  .login-logo-text span:first-child { display:block; font-family:'Cormorant Garamond',serif; font-size:20px; font-weight:600; letter-spacing:0.15em; color:var(--silver); }
+  .login-logo-text span:last-child { display:block; font-size:8px; letter-spacing:0.4em; color:var(--gold); text-transform:uppercase; margin-top:2px; }
+  .login-title { font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:300; color:var(--silver); margin-bottom:6px; }
+  .login-sub { font-size:10px; letter-spacing:0.3em; color:rgba(220,220,222,0.35); text-transform:uppercase; margin-bottom:32px; }
+  .login-field { margin-bottom:16px; }
+  .login-field label { display:block; font-size:9px; letter-spacing:0.35em; text-transform:uppercase; color:var(--gold); margin-bottom:8px; }
+  .login-field input {
+    width:100%; background:rgba(14,18,20,0.6); border:1px solid rgba(194,155,102,0.2);
+    padding:14px 16px; font-family:'Jost',sans-serif; font-size:14px; color:var(--silver);
+    outline:none; transition:border-color 0.3s;
+  }
+  .login-field input:focus { border-color:var(--gold); }
+  .login-field input::placeholder { color:rgba(220,220,222,0.25); }
+  .btn-login {
+    width:100%; padding:16px; background:var(--gold); border:none;
+    font-family:'Jost',sans-serif; font-size:11px; letter-spacing:0.4em;
+    text-transform:uppercase; color:var(--dark); font-weight:500;
+    cursor:pointer; transition:all 0.3s; margin-top:8px;
+  }
+  .btn-login:hover { background:var(--cream); }
+  .login-error { font-size:11px; color:var(--danger); letter-spacing:0.1em; margin-top:12px; text-align:center; display:none; }
+
+  /* ── LAYOUT ADMIN ── */
+  .admin-layout { display:none; min-height:100vh; }
+  .admin-layout.visible { display:flex; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width:240px; background:var(--dark-2); border-right:1px solid rgba(194,155,102,0.1);
+    display:flex; flex-direction:column; position:fixed; top:0; bottom:0; left:0; z-index:50;
+    transition:transform 0.3s;
+  }
+  .sidebar-logo { padding:24px 20px; border-bottom:1px solid rgba(194,155,102,0.08); display:flex; align-items:center; gap:10px; }
+  .sidebar-logo svg { width:26px; height:26px; flex-shrink:0; }
+  .sidebar-logo-text span:first-child { display:block; font-family:'Cormorant Garamond',serif; font-size:16px; font-weight:600; letter-spacing:0.12em; color:var(--silver); }
+  .sidebar-logo-text span:last-child { display:block; font-size:7px; letter-spacing:0.35em; color:var(--gold); text-transform:uppercase; margin-top:1px; }
+  .sidebar-badge { font-size:8px; letter-spacing:0.2em; color:rgba(194,155,102,0.5); text-transform:uppercase; padding:6px 20px 14px; }
+
+  .nav-menu { flex:1; padding:8px 0; overflow-y:auto; }
+  .nav-item {
+    display:flex; align-items:center; gap:12px; padding:13px 20px;
+    font-size:11px; letter-spacing:0.2em; text-transform:uppercase;
+    color:rgba(220,220,222,0.45); cursor:pointer; transition:all 0.25s;
+    border-left:2px solid transparent;
+  }
+  .nav-item:hover { color:var(--gold-light); background:rgba(194,155,102,0.04); }
+  .nav-item.active { color:var(--gold); border-left-color:var(--gold); background:rgba(194,155,102,0.06); }
+  .nav-item svg { width:16px; height:16px; fill:currentColor; flex-shrink:0; }
+  .nav-badge { background:var(--gold); color:var(--dark); font-size:9px; font-weight:700; padding:1px 7px; border-radius:10px; margin-left:auto; }
+
+  .sidebar-footer { padding:16px 20px; border-top:1px solid rgba(194,155,102,0.08); }
+  .btn-logout { width:100%; padding:10px; background:transparent; border:1px solid rgba(220,220,222,0.1); color:rgba(220,220,222,0.35); font-family:'Jost',sans-serif; font-size:10px; letter-spacing:0.25em; text-transform:uppercase; cursor:pointer; transition:all 0.3s; }
+  .btn-logout:hover { border-color:var(--danger); color:var(--danger); }
+
+  /* MAIN */
+  .main-content { margin-left:240px; flex:1; padding:0; min-height:100vh; }
+  .topbar { padding:20px 36px; border-bottom:1px solid rgba(194,155,102,0.08); display:flex; align-items:center; justify-content:space-between; background:var(--dark-2); position:sticky; top:0; z-index:40; }
+  .topbar-title { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:300; color:var(--silver); }
+  .topbar-actions { display:flex; gap:10px; }
+
+  /* PÁGINAS */
+  .page { display:none; padding:36px; }
+  .page.active { display:block; }
+
+  /* CARDS STATS */
+  .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:2px; margin-bottom:36px; }
+  .stat-card { background:var(--dark-3); border:1px solid rgba(194,155,102,0.07); padding:24px; }
+  .stat-card-num { font-family:'Cormorant Garamond',serif; font-size:36px; font-weight:300; color:var(--gold); line-height:1; margin-bottom:6px; }
+  .stat-card-label { font-size:9px; letter-spacing:0.3em; text-transform:uppercase; color:rgba(220,220,222,0.4); }
+
+  /* TABLA */
+  .section-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+  .section-head h2 { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:300; color:var(--silver); }
+  .tabla-wrap { border:1px solid rgba(194,155,102,0.08); overflow:hidden; }
+  table { width:100%; border-collapse:collapse; }
+  thead tr { background:var(--dark-3); border-bottom:1px solid rgba(194,155,102,0.1); }
+  th { padding:12px 16px; font-size:9px; letter-spacing:0.3em; text-transform:uppercase; color:var(--gold); text-align:left; font-weight:400; }
+  tbody tr { border-bottom:1px solid rgba(194,155,102,0.05); transition:background 0.2s; }
+  tbody tr:hover { background:rgba(194,155,102,0.03); }
+  td { padding:14px 16px; font-size:13px; color:rgba(220,220,222,0.75); vertical-align:middle; }
+  .td-img { width:52px; height:40px; object-fit:cover; border:1px solid rgba(194,155,102,0.1); }
+  .badge-op { font-size:9px; letter-spacing:0.2em; text-transform:uppercase; padding:3px 10px; font-weight:500; }
+  .badge-venta { background:rgba(194,155,102,0.15); color:var(--gold); }
+  .badge-alquiler { background:rgba(39,174,96,0.12); color:#5dbb8a; }
+  .td-actions { display:flex; gap:6px; }
+  .btn-sm { padding:6px 12px; font-family:'Jost',sans-serif; font-size:9px; letter-spacing:0.2em; text-transform:uppercase; cursor:pointer; transition:all 0.25s; border:1px solid; }
+  .btn-edit { background:transparent; border-color:rgba(194,155,102,0.3); color:var(--gold); }
+  .btn-edit:hover { background:rgba(194,155,102,0.1); }
+  .btn-del { background:transparent; border-color:rgba(192,57,43,0.3); color:var(--danger); }
+  .btn-del:hover { background:rgba(192,57,43,0.1); }
+
+  /* BOTONES */
+  .btn-primary { padding:12px 24px; background:var(--gold); border:none; font-family:'Jost',sans-serif; font-size:10px; letter-spacing:0.35em; text-transform:uppercase; color:var(--dark); font-weight:500; cursor:pointer; transition:all 0.3s; }
+  .btn-primary:hover { background:var(--cream); }
+  .btn-secondary { padding:12px 24px; background:transparent; border:1px solid rgba(194,155,102,0.3); font-family:'Jost',sans-serif; font-size:10px; letter-spacing:0.35em; text-transform:uppercase; color:var(--gold); cursor:pointer; transition:all 0.3s; }
+  .btn-secondary:hover { background:rgba(194,155,102,0.08); }
+
+  /* FORMULARIOS */
+  .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .form-grid.cols3 { grid-template-columns:1fr 1fr 1fr; }
+  .form-full { grid-column:1/-1; }
+  .field { display:flex; flex-direction:column; gap:8px; }
+  .field label { font-size:9px; letter-spacing:0.35em; text-transform:uppercase; color:var(--gold); }
+  .field input, .field select, .field textarea {
+    background:rgba(14,18,20,0.6); border:1px solid rgba(194,155,102,0.18);
+    padding:12px 14px; font-family:'Jost',sans-serif; font-size:13px; color:var(--silver);
+    outline:none; transition:border-color 0.3s; resize:vertical;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color:var(--gold); }
+  .field input::placeholder, .field textarea::placeholder { color:rgba(220,220,222,0.25); }
+  .field select option { background:var(--dark-2); }
+  .form-card { background:var(--dark-3); border:1px solid rgba(194,155,102,0.08); padding:28px; margin-bottom:24px; }
+  .form-card-title { font-size:10px; letter-spacing:0.35em; text-transform:uppercase; color:var(--gold); margin-bottom:20px; padding-bottom:12px; border-bottom:1px solid rgba(194,155,102,0.08); }
+
+  /* FOTO UPLOAD */
+  .foto-upload { border:2px dashed rgba(194,155,102,0.2); padding:32px; text-align:center; cursor:pointer; transition:all 0.3s; position:relative; }
+  .foto-upload:hover { border-color:rgba(194,155,102,0.5); background:rgba(194,155,102,0.03); }
+  .foto-upload input { position:absolute; inset:0; opacity:0; cursor:pointer; }
+  .foto-upload-icon { font-size:32px; margin-bottom:10px; opacity:0.4; }
+  .foto-upload p { font-size:11px; letter-spacing:0.2em; color:rgba(220,220,222,0.4); text-transform:uppercase; }
+  .foto-preview { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+  .foto-thumb { width:80px; height:60px; object-fit:cover; border:1px solid rgba(194,155,102,0.15); }
+
+  /* CONFIGURACIÓN */
+  .config-section { background:var(--dark-3); border:1px solid rgba(194,155,102,0.08); padding:28px; margin-bottom:16px; }
+  .config-section-title { font-size:10px; letter-spacing:0.35em; text-transform:uppercase; color:var(--gold); margin-bottom:20px; }
+  .logo-preview-box { width:200px; height:70px; background:var(--dark); border:1px solid rgba(194,155,102,0.12); display:flex; align-items:center; justify-content:center; margin-bottom:14px; overflow:hidden; }
+  .logo-preview-box img { max-width:180px; max-height:60px; object-fit:contain; }
+  .color-row { display:flex; gap:14px; flex-wrap:wrap; margin-top:12px; }
+  .color-item { display:flex; flex-direction:column; align-items:center; gap:6px; }
+  .color-item label { font-size:9px; letter-spacing:0.2em; color:rgba(220,220,222,0.4); text-transform:uppercase; }
+  .color-item input[type=color] { width:48px; height:48px; border:1px solid rgba(194,155,102,0.2); background:none; cursor:pointer; padding:2px; }
+
+  /* ALERTAS CLIENTES */
+  .alerta-cliente-card { background:var(--dark-3); border:1px solid rgba(194,155,102,0.08); padding:20px; margin-bottom:8px; display:grid; grid-template-columns:1fr auto; gap:16px; align-items:center; }
+  .alerta-cliente-nombre { font-size:14px; color:var(--silver); margin-bottom:4px; }
+  .alerta-cliente-busqueda { font-size:12px; color:var(--gold); font-style:italic; margin-bottom:4px; }
+  .alerta-cliente-contact { font-size:11px; letter-spacing:0.1em; color:rgba(220,220,222,0.35); }
+  .alerta-card-actions { display:flex; gap:8px; }
+
+  /* MODAL */
+  .modal-overlay { position:fixed; inset:0; background:rgba(14,18,20,0.9); z-index:200; display:none; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(6px); }
+  .modal-overlay.open { display:flex; }
+  .modal-box { background:var(--dark-2); border:1px solid rgba(194,155,102,0.18); max-width:700px; width:100%; max-height:90vh; overflow-y:auto; animation:fadeUp 0.3s ease; }
+  .modal-header { padding:24px 28px; border-bottom:1px solid rgba(194,155,102,0.1); display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; background:var(--dark-2); z-index:1; }
+  .modal-header h3 { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:300; color:var(--silver); }
+  .modal-close { background:none; border:none; color:var(--gold); font-size:20px; cursor:pointer; opacity:0.6; transition:opacity 0.2s; }
+  .modal-close:hover { opacity:1; }
+  .modal-body { padding:28px; }
+  .modal-footer { padding:20px 28px; border-top:1px solid rgba(194,155,102,0.1); display:flex; gap:10px; justify-content:flex-end; }
+
+  /* TOAST */
+  .toast { position:fixed; bottom:24px; right:24px; transform:translateY(100px); background:var(--dark-4); border:1px solid var(--gold); padding:14px 22px; font-size:12px; letter-spacing:0.15em; color:var(--gold); text-transform:uppercase; z-index:300; transition:transform 0.4s ease; }
+  .toast.show { transform:translateY(0); }
+  .toast.error { border-color:var(--danger); color:var(--danger); }
+
+  /* EMPTY */
+  .empty-row td { text-align:center; padding:48px; color:rgba(220,220,222,0.25); font-size:13px; letter-spacing:0.1em; }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+  /* RESPONSIVE */
+  @media(max-width:900px){
+    .sidebar { transform:translateX(-100%); }
+    .sidebar.mobile-open { transform:translateX(0); }
+    .main-content { margin-left:0; }
+    .stats-row { grid-template-columns:1fr 1fr; }
+    .form-grid { grid-template-columns:1fr; }
+    .form-grid.cols3 { grid-template-columns:1fr; }
+    .page { padding:20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <svg viewBox="0 0 40 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="20,2 38,34 2,34" fill="none" stroke="#C29B66" stroke-width="1.8" stroke-linejoin="round"/>
+        <polygon points="20,10 30,30 10,30" fill="#C29B66" opacity="0.25"/>
+        <polygon points="15,34 20,24 25,34" fill="#C29B66"/>
+      </svg>
+      <div class="login-logo-text">
+        <span>ANDINA</span>
+        <span>Real Estate</span>
+      </div>
+    </div>
+    <h2 class="login-title">Panel de administración</h2>
+    <p class="login-sub">Buenos Aires · Acceso privado</p>
+    <div class="login-field">
+      <label>Usuario</label>
+      <input type="text" id="loginUser" placeholder="admin" autocomplete="off">
+    </div>
+    <div class="login-field">
+      <label>Contraseña</label>
+      <input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn-login" onclick="doLogin()">Ingresar</button>
+    <p class="login-error" id="loginError">Usuario o contraseña incorrectos</p>
+  </div>
+</div>
+
+<!-- ── ADMIN LAYOUT ── -->
+<div class="admin-layout" id="adminLayout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <svg viewBox="0 0 40 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="20,2 38,34 2,34" fill="none" stroke="#C29B66" stroke-width="1.8" stroke-linejoin="round"/>
+        <polygon points="20,10 30,30 10,30" fill="#C29B66" opacity="0.25"/>
+        <polygon points="15,34 20,24 25,34" fill="#C29B66"/>
+      </svg>
+      <div class="sidebar-logo-text">
+        <span>ANDINA</span>
+        <span>Real Estate</span>
+      </div>
+    </div>
+    <p class="sidebar-badge">Panel Admin</p>
+    <nav class="nav-menu">
+      <div class="nav-item active" onclick="goTo('dashboard')">
+        <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item" onclick="goTo('propiedades')">
+        <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        Propiedades
+      </div>
+      <div class="nav-item" onclick="goTo('nueva')">
+        <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+        Nueva propiedad
+      </div>
+      <div class="nav-item" onclick="goTo('alertas')">
+        <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+        Alertas clientes
+        <span class="nav-badge" id="alertasBadge" style="display:none">0</span>
+      </div>
+      <div class="nav-item" onclick="goTo('config')">
+        <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+        Configuración
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn-logout" onclick="doLogout()">Cerrar sesión</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <span class="topbar-title" id="topbarTitle">Dashboard</span>
+      <div class="topbar-actions">
+        <a href="andina-realestate.html" target="_blank">
+          <button class="btn-secondary">Ver sitio web ↗</button>
+        </a>
+      </div>
+    </div>
+
+    <!-- ── DASHBOARD ── -->
+    <div class="page active" id="page-dashboard">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-card-num" id="statTotal">0</div>
+          <div class="stat-card-label">Propiedades cargadas</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-num" id="statVenta">0</div>
+          <div class="stat-card-label">En venta</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-num" id="statAlquiler">0</div>
+          <div class="stat-card-label">En alquiler</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-num" id="statAlertas">0</div>
+          <div class="stat-card-label">Alertas activas</div>
+        </div>
+      </div>
+
+      <div class="section-head">
+        <h2>Últimas propiedades</h2>
+        <button class="btn-primary" onclick="goTo('nueva')">+ Nueva propiedad</button>
+      </div>
+      <div class="tabla-wrap">
+        <table>
+          <thead><tr>
+            <th>Foto</th><th>Propiedad</th><th>Zona</th><th>Precio</th><th>Op.</th><th>Acciones</th>
+          </tr></thead>
+          <tbody id="dashTabla"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── PROPIEDADES ── -->
+    <div class="page" id="page-propiedades">
+      <div class="section-head">
+        <h2>Todas las propiedades</h2>
+        <button class="btn-primary" onclick="goTo('nueva')">+ Nueva propiedad</button>
+      </div>
+      <div class="tabla-wrap">
+        <table>
+          <thead><tr>
+            <th>Foto</th><th>Propiedad</th><th>Tipo</th><th>Zona</th><th>Precio</th><th>Amb.</th><th>Op.</th><th>Acciones</th>
+          </tr></thead>
+          <tbody id="propsTabla"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── NUEVA / EDITAR PROPIEDAD ── -->
+    <div class="page" id="page-nueva">
+      <div class="section-head">
+        <h2 id="formTitle">Nueva propiedad</h2>
+        <button class="btn-secondary" onclick="cancelarForm()">Cancelar</button>
+      </div>
+
+      <div class="form-card">
+        <p class="form-card-title">Datos principales</p>
+        <div class="form-grid">
+          <div class="field form-full">
+            <label>Título de la propiedad</label>
+            <input type="text" id="fTitulo" placeholder="Ej: Departamento 2 ambientes luminoso con balcón">
+          </div>
+          <div class="field">
+            <label>Operación</label>
+            <select id="fOp">
+              <option value="venta">Venta</option>
+              <option value="alquiler">Alquiler</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Tipo</label>
+            <select id="fTipo">
+              <option value="departamento">Departamento</option>
+              <option value="casa">Casa</option>
+              <option value="ph">PH</option>
+              <option value="local">Local / Comercial</option>
+              <option value="terreno">Terreno</option>
+              <option value="oficina">Oficina</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Precio</label>
+            <input type="text" id="fPrecio" placeholder="Ej: USD 95.000 o $550.000/mes">
+          </div>
+          <div class="field">
+            <label>Precio numérico (para filtros)</label>
+            <input type="number" id="fPrecioNum" placeholder="95000">
+          </div>
+          <div class="field">
+            <label>Zona / Barrio</label>
+            <input type="text" id="fZona" placeholder="Ej: Palermo, CABA">
+          </div>
+          <div class="field">
+            <label>Ambientes</label>
+            <input type="number" id="fAmb" placeholder="0" min="0" max="20">
+          </div>
+          <div class="field">
+            <label>M² cubiertos</label>
+            <input type="number" id="fM2" placeholder="60" min="0">
+          </div>
+          <div class="field">
+            <label>Baños</label>
+            <input type="number" id="fBanos" placeholder="1" min="0" max="10">
+          </div>
+          <div class="field form-full">
+            <label>Descripción</label>
+            <textarea id="fDesc" rows="4" placeholder="Describí la propiedad: características, estado, entorno..."></textarea>
+          </div>
+          <div class="field">
+            <label>URL de foto principal</label>
+            <input type="text" id="fImg" placeholder="https://... o dejá vacío para foto genérica">
+          </div>
+          <div class="field">
+            <label>Fuente / Portal de referencia</label>
+            <input type="text" id="fSource" placeholder="Ej: Andina, ZonaProp, Argenprop">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <p class="form-card-title">Características adicionales</p>
+        <div class="form-grid cols3">
+          <div class="field">
+            <label>Cochera</label>
+            <select id="fCochera"><option value="no">No</option><option value="si">Sí</option></select>
+          </div>
+          <div class="field">
+            <label>Amenities</label>
+            <select id="fAmenities"><option value="no">No</option><option value="si">Sí</option></select>
+          </div>
+          <div class="field">
+            <label>Terraza / Balcón</label>
+            <select id="fTerraza"><option value="no">No</option><option value="si">Sí</option></select>
+          </div>
+          <div class="field">
+            <label>Pileta</label>
+            <select id="fPileta"><option value="no">No</option><option value="si">Sí</option></select>
+          </div>
+          <div class="field">
+            <label>Antigüedad</label>
+            <input type="text" id="fAntiguedad" placeholder="Ej: A estrenar, 5 años">
+          </div>
+          <div class="field">
+            <label>Expensas</label>
+            <input type="text" id="fExpensas" placeholder="Ej: $45.000/mes">
+          </div>
+        </div>
+      </div>
+
+      <input type="hidden" id="fId">
+      <div style="display:flex;gap:12px;">
+        <button class="btn-primary" onclick="guardarPropiedad()">Guardar propiedad</button>
+        <button class="btn-secondary" onclick="cancelarForm()">Cancelar</button>
+      </div>
+    </div>
+
+    <!-- ── ALERTAS ── -->
+    <div class="page" id="page-alertas">
+      <div class="section-head">
+        <h2>Alertas de clientes</h2>
+        <span style="font-size:11px;letter-spacing:0.2em;color:rgba(220,220,222,0.35);text-transform:uppercase;">Clientes que esperan novedades</span>
+      </div>
+      <div id="alertasLista"></div>
+    </div>
+
+    <!-- ── CONFIGURACIÓN ── -->
+    <div class="page" id="page-config">
+
+      <div class="config-section">
+        <p class="config-section-title">Identidad — Logo</p>
+        <div class="logo-preview-box" id="logoPreviewBox">
+          <svg width="120" viewBox="0 0 200 60" fill="none">
+            <polygon points="24,4 38,28 10,28" fill="none" stroke="#C29B66" stroke-width="1.2"/>
+            <polygon points="24,10 32,24 16,24" fill="#C29B66" opacity="0.3"/>
+            <polygon points="20,28 24,20 28,28" fill="#C29B66"/>
+            <text x="48" y="26" font-family="serif" font-size="22" fill="#DCDCDE" letter-spacing="3">ANDINA</text>
+            <text x="49" y="40" font-family="sans-serif" font-size="9" fill="#C29B66" letter-spacing="5">REAL ESTATE</text>
+          </svg>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <div class="foto-upload" style="width:200px;padding:16px;">
+            <input type="file" accept="image/*" onchange="previewLogo(this)">
+            <div class="foto-upload-icon">🖼</div>
+            <p>Subir nuevo logo</p>
+          </div>
+          <button class="btn-secondary" onclick="resetLogo()">Restaurar logo original</button>
+        </div>
+      </div>
+
+      <div class="config-section">
+        <p class="config-section-title">Colores de la marca</p>
+        <div class="color-row">
+          <div class="color-item">
+            <input type="color" id="colorGold" value="#C29B66" onchange="previewColor('gold',this.value)">
+            <label>Dorado</label>
+          </div>
+          <div class="color-item">
+            <input type="color" id="colorBg" value="#0E1214" onchange="previewColor('bg',this.value)">
+            <label>Fondo</label>
+          </div>
+          <div class="color-item">
+            <input type="color" id="colorSilver" value="#DCDCDE" onchange="previewColor('silver',this.value)">
+            <label>Textos</label>
+          </div>
+        </div>
+        <button class="btn-secondary" style="margin-top:16px;" onclick="guardarColores()">Guardar colores</button>
+      </div>
+
+      <div class="config-section">
+        <p class="config-section-title">Datos de contacto</p>
+        <div class="form-grid">
+          <div class="field">
+            <label>Número WhatsApp</label>
+            <input type="text" id="cfgWhatsapp" placeholder="+54911XXXXXXXX">
+          </div>
+          <div class="field">
+            <label>Email de contacto</label>
+            <input type="email" id="cfgEmail" placeholder="contacto@andina.com.ar">
+          </div>
+          <div class="field">
+            <label>Dirección de la oficina</label>
+            <input type="text" id="cfgDireccion" placeholder="Ej: Av. Corrientes 1234, CABA">
+          </div>
+          <div class="field">
+            <label>Horario de atención</label>
+            <input type="text" id="cfgHorario" placeholder="Lun–Vie 9:00–18:00">
+          </div>
+        </div>
+        <button class="btn-primary" style="margin-top:20px;" onclick="guardarConfig()">Guardar configuración</button>
+      </div>
+
+      <div class="config-section">
+        <p class="config-section-title">Textos del sitio</p>
+        <div class="form-grid">
+          <div class="field form-full">
+            <label>Título hero (encabezado principal)</label>
+            <input type="text" id="cfgTituloHero" placeholder="Tu próxima propiedad está acá">
+          </div>
+          <div class="field form-full">
+            <label>Subtítulo hero</label>
+            <input type="text" id="cfgSubHero" placeholder="Hablá o escribí lo que buscás...">
+          </div>
+          <div class="field form-full">
+            <label>Texto sección Nosotros</label>
+            <textarea id="cfgNosotros" rows="4" placeholder="Descripción de la inmobiliaria..."></textarea>
+          </div>
+        </div>
+        <button class="btn-primary" style="margin-top:20px;" onclick="guardarTextos()">Guardar textos</button>
+      </div>
+
+      <div class="config-section">
+        <p class="config-section-title">Contraseña del panel</p>
+        <div class="form-grid">
+          <div class="field">
+            <label>Nueva contraseña</label>
+            <input type="password" id="cfgPassNueva" placeholder="••••••••">
+          </div>
+          <div class="field">
+            <label>Confirmar contraseña</label>
+            <input type="password" id="cfgPassConfirm" placeholder="••••••••">
+          </div>
+        </div>
+        <button class="btn-secondary" style="margin-top:20px;" onclick="cambiarPassword()">Cambiar contraseña</button>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- MODAL EDITAR -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Editar propiedad</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn-primary" onclick="guardarEdicion()">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+const ADMIN_USER = 'admin';
+let ADMIN_PASS = 'andina2025'; // Cambiar desde el panel
+
+// ── DATOS ─────────────────────────────────────────────────────────────────────
+let propiedades = JSON.parse(localStorage.getItem('andina_props') || 'null') || [
+  {id:1,titulo:"Departamento 2 ambientes luminoso con balcón",op:"venta",tipo:"departamento",precio:"USD 89.000",precioNum:89000,zona:"Caballito, CABA",amb:2,m2:52,banos:1,source:"Andina",img:"https://images.unsplash.com/photo-1599413987323-b2b8e0d7d9c7?w=600&q=80",desc:"",cochera:"no",amenities:"no",terraza:"si",pileta:"no",antiguedad:"",expensas:""},
+  {id:2,titulo:"Departamento 3 ambientes a estrenar con cochera",op:"venta",tipo:"departamento",precio:"USD 165.000",precioNum:165000,zona:"Palermo, CABA",amb:3,m2:78,banos:2,source:"Andina",img:"https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=600&q=80",desc:"",cochera:"si",amenities:"si",terraza:"no",pileta:"no",antiguedad:"A estrenar",expensas:"$55.000/mes"},
+  {id:3,titulo:"PH 4 ambientes con terraza propia",op:"venta",tipo:"ph",precio:"USD 198.000",precioNum:198000,zona:"Villa Crespo, CABA",amb:4,m2:110,banos:2,source:"Andina",img:"https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=600&q=80",desc:"",cochera:"no",amenities:"no",terraza:"si",pileta:"no",antiguedad:"10 años",expensas:"$38.000/mes"},
+  {id:4,titulo:"Monoambiente premium frente al río",op:"alquiler",tipo:"departamento",precio:"$580.000 / mes",precioNum:580000,zona:"Puerto Madero, CABA",amb:1,m2:38,banos:1,source:"Andina",img:"https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=600&q=80",desc:"",cochera:"no",amenities:"si",terraza:"no",pileta:"si",antiguedad:"3 años",expensas:"$95.000/mes"},
+  {id:5,titulo:"Casa 4 ambientes con jardín y pileta",op:"venta",tipo:"casa",precio:"USD 320.000",precioNum:320000,zona:"San Isidro, GBA Norte",amb:4,m2:180,banos:3,source:"Andina",img:"https://images.unsplash.com/photo-1598228723793-52759bba239c?w=600&q=80",desc:"",cochera:"si",amenities:"no",terraza:"no",pileta:"si",antiguedad:"20 años",expensas:""},
+];
+
+let alertasClientes = JSON.parse(localStorage.getItem('andina_alertas_admin') || '[]');
+let editandoId = null;
+let config = JSON.parse(localStorage.getItem('andina_config') || '{}');
+
+function savePropiedades(){ localStorage.setItem('andina_props', JSON.stringify(propiedades)); }
+function saveAlertas(){ localStorage.setItem('andina_alertas_admin', JSON.stringify(alertasClientes)); }
+function saveConfig(){ localStorage.setItem('andina_config', JSON.stringify(config)); }
+
+// ── LOGIN ─────────────────────────────────────────────────────────────────────
+function doLogin(){
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value;
+  const stored=localStorage.getItem('andina_admin_pass')||ADMIN_PASS;
+  if(u===ADMIN_USER && p===stored){
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('adminLayout').classList.add('visible');
+    initAdmin();
+  } else {
+    document.getElementById('loginError').style.display='block';
+    setTimeout(()=>document.getElementById('loginError').style.display='none',3000);
+  }
+}
+
+function doLogout(){
+  document.getElementById('adminLayout').classList.remove('visible');
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+}
+
+// ── NAVEGACIÓN ────────────────────────────────────────────────────────────────
+const pageTitles = {
+  dashboard:'Dashboard', propiedades:'Propiedades', nueva:'Nueva propiedad',
+  alertas:'Alertas clientes', config:'Configuración'
+};
+
+function goTo(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelector(`.nav-item[onclick="goTo('${page}')"]`).classList.add('active');
+  document.getElementById('topbarTitle').textContent=pageTitles[page];
+  if(page==='dashboard') renderDashboard();
+  if(page==='propiedades') renderPropiedadesTabla();
+  if(page==='alertas') renderAlertas();
+  if(page==='config') cargarConfig();
+  if(page==='nueva'){ editandoId=null; limpiarForm(); document.getElementById('formTitle').textContent='Nueva propiedad'; }
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────────────────
+function initAdmin(){
+  renderDashboard();
+  actualizarBadgeAlertas();
+  cargarConfig();
+}
+
+function renderDashboard(){
+  const ventas=propiedades.filter(p=>p.op==='venta').length;
+  const alquileres=propiedades.filter(p=>p.op==='alquiler').length;
+  document.getElementById('statTotal').textContent=propiedades.length;
+  document.getElementById('statVenta').textContent=ventas;
+  document.getElementById('statAlquiler').textContent=alquileres;
+  document.getElementById('statAlertas').textContent=alertasClientes.length;
+  const tbody=document.getElementById('dashTabla');
+  if(propiedades.length===0){ tbody.innerHTML='<tr class="empty-row"><td colspan="6">Sin propiedades cargadas. <a onclick="goTo(\'nueva\')" style="color:var(--gold);cursor:pointer;">Cargar una</a></td></tr>'; return; }
+  tbody.innerHTML=propiedades.slice(0,5).map(p=>rowTabla(p,false)).join('');
+}
+
+function rowTabla(p, full=true){
+  return `<tr>
+    <td><img class="td-img" src="${p.img||'https://images.unsplash.com/photo-1589909202802-8f4aadce1849?w=200&q=60'}" onerror="this.src='https://images.unsplash.com/photo-1589909202802-8f4aadce1849?w=200&q=60'"></td>
+    <td style="max-width:220px;"><div style="font-size:13px;color:var(--silver);line-height:1.4;">${p.titulo}</div></td>
+    ${full?`<td>${p.tipo}</td>`:''}
+    <td style="font-size:12px;">${p.zona}</td>
+    <td style="color:var(--gold);font-size:13px;">${p.precio}</td>
+    ${full?`<td>${p.amb>0?p.amb:'—'}</td>`:''}
+    <td><span class="badge-op ${p.op==='venta'?'badge-venta':'badge-alquiler'}">${p.op}</span></td>
+    <td><div class="td-actions">
+      <button class="btn-sm btn-edit" onclick="editarProp(${p.id})">Editar</button>
+      <button class="btn-sm btn-del" onclick="eliminarProp(${p.id})">Borrar</button>
+    </div></td>
+  </tr>`;
+}
+
+// ── PROPIEDADES TABLA ─────────────────────────────────────────────────────────
+function renderPropiedadesTabla(){
+  const tbody=document.getElementById('propsTabla');
+  if(propiedades.length===0){ tbody.innerHTML='<tr class="empty-row"><td colspan="8">Sin propiedades. <a onclick="goTo(\'nueva\')" style="color:var(--gold);cursor:pointer;">Cargar primera propiedad</a></td></tr>'; return; }
+  tbody.innerHTML=propiedades.map(p=>rowTabla(p,true)).join('');
+}
+
+// ── NUEVA / EDITAR PROPIEDAD ──────────────────────────────────────────────────
+function limpiarForm(){
+  ['fTitulo','fPrecio','fPrecioNum','fZona','fAmb','fM2','fBanos','fDesc','fImg','fSource','fAntiguedad','fExpensas'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  ['fOp','fTipo','fCochera','fAmenities','fTerraza','fPileta'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.selectedIndex=0;
+  });
+  document.getElementById('fId').value='';
+}
+
+function cancelarForm(){
+  goTo(propiedades.length>0?'propiedades':'dashboard');
+}
+
+function editarProp(id){
+  const p=propiedades.find(x=>x.id===id);
+  if(!p) return;
+  editandoId=id;
+  document.getElementById('formTitle').textContent='Editar propiedad';
+  document.getElementById('fId').value=id;
+  document.getElementById('fTitulo').value=p.titulo||'';
+  document.getElementById('fOp').value=p.op||'venta';
+  document.getElementById('fTipo').value=p.tipo||'departamento';
+  document.getElementById('fPrecio').value=p.precio||'';
+  document.getElementById('fPrecioNum').value=p.precioNum||'';
+  document.getElementById('fZona').value=p.zona||'';
+  document.getElementById('fAmb').value=p.amb||'';
+  document.getElementById('fM2').value=p.m2||'';
+  document.getElementById('fBanos').value=p.banos||'';
+  document.getElementById('fDesc').value=p.desc||'';
+  document.getElementById('fImg').value=p.img||'';
+  document.getElementById('fSource').value=p.source||'';
+  document.getElementById('fCochera').value=p.cochera||'no';
+  document.getElementById('fAmenities').value=p.amenities||'no';
+  document.getElementById('fTerraza').value=p.terraza||'no';
+  document.getElementById('fPileta').value=p.pileta||'no';
+  document.getElementById('fAntiguedad').value=p.antiguedad||'';
+  document.getElementById('fExpensas').value=p.expensas||'';
+  goTo('nueva');
+}
+
+function guardarPropiedad(){
+  const titulo=document.getElementById('fTitulo').value.trim();
+  if(!titulo){ showToast('El título es obligatorio','error'); return; }
+  const idVal=document.getElementById('fId').value;
+  const prop={
+    id: idVal ? parseInt(idVal) : Date.now(),
+    titulo, op:document.getElementById('fOp').value,
+    tipo:document.getElementById('fTipo').value,
+    precio:document.getElementById('fPrecio').value,
+    precioNum:parseFloat(document.getElementById('fPrecioNum').value)||0,
+    zona:document.getElementById('fZona').value,
+    amb:parseInt(document.getElementById('fAmb').value)||0,
+    m2:parseInt(document.getElementById('fM2').value)||0,
+    banos:parseInt(document.getElementById('fBanos').value)||1,
+    desc:document.getElementById('fDesc').value,
+    img:document.getElementById('fImg').value||'https://images.unsplash.com/photo-1589909202802-8f4aadce1849?w=600&q=80',
+    source:document.getElementById('fSource').value||'Andina',
+    cochera:document.getElementById('fCochera').value,
+    amenities:document.getElementById('fAmenities').value,
+    terraza:document.getElementById('fTerraza').value,
+    pileta:document.getElementById('fPileta').value,
+    antiguedad:document.getElementById('fAntiguedad').value,
+    expensas:document.getElementById('fExpensas').value,
+  };
+  if(idVal){
+    const idx=propiedades.findIndex(x=>x.id===prop.id);
+    if(idx>=0) propiedades[idx]=prop;
+  } else {
+    propiedades.unshift(prop);
+  }
+  savePropiedades();
+  showToast(idVal?'Propiedad actualizada ✓':'Propiedad guardada ✓');
+  goTo('propiedades');
+}
+
+function eliminarProp(id){
+  if(!confirm('¿Eliminar esta propiedad? No se puede deshacer.')) return;
+  propiedades=propiedades.filter(p=>p.id!==id);
+  savePropiedades();
+  renderDashboard();
+  renderPropiedadesTabla();
+  showToast('Propiedad eliminada');
+}
+
+// ── ALERTAS ───────────────────────────────────────────────────────────────────
+function actualizarBadgeAlertas(){
+  const badge=document.getElementById('alertasBadge');
+  if(alertasClientes.length>0){ badge.textContent=alertasClientes.length; badge.style.display='inline'; }
+  else { badge.style.display='none'; }
+}
+
+function renderAlertas(){
+  const lista=document.getElementById('alertasLista');
+  if(alertasClientes.length===0){
+    lista.innerHTML='<div style="text-align:center;padding:60px;color:rgba(220,220,222,0.25);font-size:13px;letter-spacing:0.1em;">Sin alertas activas de clientes</div>';
+    return;
+  }
+  lista.innerHTML=alertasClientes.map((a,i)=>`
+    <div class="alerta-cliente-card">
+      <div>
+        <div class="alerta-cliente-nombre">👤 ${a.nombre}</div>
+        <div class="alerta-cliente-busqueda">🔍 ${a.busqueda}</div>
+        <div class="alerta-cliente-contact">📱 ${a.tel} ${a.email?'· '+a.email:''} · ${a.fecha}</div>
+      </div>
+      <div class="alerta-card-actions">
+        <a href="https://wa.me/${a.tel.replace(/\D/g,'')}" target="_blank">
+          <button class="btn-sm btn-edit">WhatsApp</button>
+        </a>
+        <button class="btn-sm btn-del" onclick="eliminarAlerta(${i})">Borrar</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function eliminarAlerta(i){
+  alertasClientes.splice(i,1);
+  saveAlertas();
+  renderAlertas();
+  actualizarBadgeAlertas();
+  showToast('Alerta eliminada');
+}
+
+// ── CONFIGURACIÓN ─────────────────────────────────────────────────────────────
+function cargarConfig(){
+  if(config.whatsapp) document.getElementById('cfgWhatsapp').value=config.whatsapp;
+  if(config.email) document.getElementById('cfgEmail').value=config.email;
+  if(config.direccion) document.getElementById('cfgDireccion').value=config.direccion;
+  if(config.horario) document.getElementById('cfgHorario').value=config.horario;
+  if(config.tituloHero) document.getElementById('cfgTituloHero').value=config.tituloHero;
+  if(config.subHero) document.getElementById('cfgSubHero').value=config.subHero;
+  if(config.nosotros) document.getElementById('cfgNosotros').value=config.nosotros;
+  if(config.colorGold) document.getElementById('colorGold').value=config.colorGold;
+  if(config.colorBg) document.getElementById('colorBg').value=config.colorBg;
+}
+
+function guardarConfig(){
+  config.whatsapp=document.getElementById('cfgWhatsapp').value.trim();
+  config.email=document.getElementById('cfgEmail').value.trim();
+  config.direccion=document.getElementById('cfgDireccion').value.trim();
+  config.horario=document.getElementById('cfgHorario').value.trim();
+  saveConfig();
+  showToast('Configuración guardada ✓');
+}
+
+function guardarTextos(){
+  config.tituloHero=document.getElementById('cfgTituloHero').value.trim();
+  config.subHero=document.getElementById('cfgSubHero').value.trim();
+  config.nosotros=document.getElementById('cfgNosotros').value.trim();
+  saveConfig();
+  showToast('Textos guardados ✓');
+}
+
+function guardarColores(){
+  config.colorGold=document.getElementById('colorGold').value;
+  config.colorBg=document.getElementById('colorBg').value;
+  config.colorSilver=document.getElementById('colorSilver').value;
+  saveConfig();
+  showToast('Colores guardados ✓');
+}
+
+function previewLogo(input){
+  const file=input.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const box=document.getElementById('logoPreviewBox');
+    box.innerHTML=`<img src="${e.target.result}" style="max-width:180px;max-height:60px;object-fit:contain;">`;
+    config.logoData=e.target.result;
+    saveConfig();
+    showToast('Logo actualizado ✓');
+  };
+  reader.readAsDataURL(file);
+}
+
+function resetLogo(){
+  const box=document.getElementById('logoPreviewBox');
+  box.innerHTML=`<svg width="120" viewBox="0 0 200 60" fill="none"><polygon points="24,4 38,28 10,28" fill="none" stroke="#C29B66" stroke-width="1.2"/><polygon points="24,10 32,24 16,24" fill="#C29B66" opacity="0.3"/><polygon points="20,28 24,20 28,28" fill="#C29B66"/><text x="48" y="26" font-family="serif" font-size="22" fill="#DCDCDE" letter-spacing="3">ANDINA</text><text x="49" y="40" font-family="sans-serif" font-size="9" fill="#C29B66" letter-spacing="5">REAL ESTATE</text></svg>`;
+  delete config.logoData;
+  saveConfig();
+  showToast('Logo restaurado');
+}
+
+function previewColor(key, val){
+  // Vista previa en tiempo real
+  document.documentElement.style.setProperty('--'+key, val);
+}
+
+function cambiarPassword(){
+  const nueva=document.getElementById('cfgPassNueva').value;
+  const confirma=document.getElementById('cfgPassConfirm').value;
+  if(!nueva||nueva.length<6){ showToast('Mínimo 6 caracteres','error'); return; }
+  if(nueva!==confirma){ showToast('Las contraseñas no coinciden','error'); return; }
+  localStorage.setItem('andina_admin_pass', nueva);
+  document.getElementById('cfgPassNueva').value='';
+  document.getElementById('cfgPassConfirm').value='';
+  showToast('Contraseña cambiada ✓');
+}
+
+// ── MODAL ─────────────────────────────────────────────────────────────────────
+function closeModal(){ document.getElementById('modalOverlay').classList.remove('open'); editandoId=null; }
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+function showToast(msg, type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast'+(type?' '+type:'');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+document.getElementById('loginUser').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('loginPass').focus(); });
+</script>
+</body>
+</html>
