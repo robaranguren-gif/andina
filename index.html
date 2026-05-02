@@ -745,6 +745,8 @@ const PROPS = [
   {id:18,title:"Departamento 3 ambientes con cochera incluida",location:"Belgrano, CABA",price:"$750.000 / mes",priceNum:750000,op:"alquiler",type:"departamento",amb:3,m2:80,banos:2,source:"Argenprop",img:"https://images.unsplash.com/photo-1505691723518-36a5ac3be353?w=600&q=80"},
   {id:19,title:"Casa 4 ambientes con jardín y quincho",location:"Olivos, GBA Norte",price:"$890.000 / mes",priceNum:890000,op:"alquiler",type:"casa",amb:4,m2:200,banos:3,source:"MercadoLibre",img:"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80"},
   {id:20,title:"Departamento 1 ambiente luminoso, piso 8",location:"San Telmo, CABA",price:"$360.000 / mes",priceNum:360000,op:"alquiler",type:"departamento",amb:1,m2:35,banos:1,source:"ZonaProp",img:"https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&q=80"},
+  {id:21,title:"Departamento 3 ambientes reciclado con patio",location:"Villa Crespo, CABA",price:"USD 145.000",priceNum:145000,op:"venta",type:"departamento",amb:3,m2:88,banos:2,source:"Argenprop",img:"https://images.unsplash.com/photo-1571508601891-ca5e7a713859?w=600&q=80"},
+  {id:22,title:"Departamento 2 ambientes con balcón corrido",location:"Villa Crespo, CABA",price:"$480.000 / mes",priceNum:480000,op:"alquiler",type:"departamento",amb:2,m2:58,banos:1,source:"ZonaProp",img:"https://images.unsplash.com/photo-1574362848149-11496d93a7c7?w=600&q=80"},
 ];
 
 const ANDINA_PHONE='+5491100000000';
@@ -1219,14 +1221,14 @@ function buildResponse(msg){
     const stop=new Set(["ambientes","ambiente","departamento","depto","casa","local","con","los","las","del","que","una","para","por","sin","muy","quiero","busco","tiene","algo","piso","barrio","zona","buscar","necesito"]);
     const palabras=qn.split(/\s+/).filter(w=>w.length>3&&!stop.has(w)&&!/^\d+$/.test(w));
 
-    return props.filter(p=>{
+    const filterFn=(relaxAmb)=>props.filter(p=>{
       const t=norm([p.title||p.titulo||'',p.location||p.zona||'',p.type||p.tipo||'',p.op||''].join(' '));
 
-      // Filtro por zona (AND — obligatorio si se detectó)
+      // Filtro por zona (obligatorio si se detectó)
       if(zonaFound && !t.includes(zonaFound)) return false;
 
-      // Filtro por ambientes (AND — obligatorio si se detectó)
-      if(ambNum!==null && p.amb!=null && p.amb!==ambNum) return false;
+      // Filtro por ambientes (omitir si relaxAmb=true)
+      if(!relaxAmb && ambNum!==null && p.amb!=null && p.amb!==ambNum) return false;
 
       // Si algún filtro activo pasó, incluir
       if(zonaFound||ambNum!==null) return true;
@@ -1234,6 +1236,11 @@ function buildResponse(msg){
       // Fallback: keyword match excluyendo stopwords
       return palabras.length===0||palabras.some(w=>t.includes(w));
     }).slice(0,3);
+
+    // Si zona+ambientes juntos no dan resultados, relajar filtro de ambientes
+    const strict=filterFn(false);
+    if(strict.length>0) return {list:strict, relaxed:false, ambNum, zonaFound};
+    return {list:filterFn(true), relaxed:ambNum!==null, ambNum, zonaFound};
   }
 
   function propChips(list){
@@ -1249,9 +1256,17 @@ function buildResponse(msg){
   const zonaKey=Object.keys(CHAT_KB.zonas).find(z=>m.includes(z));
   if(zonaKey){
     const z=CHAT_KB.zonas[zonaKey];
-    const ps=matchProps(msg);
+    const match=matchProps(msg);
+    const ps=match.list;
     const verMas=`<a href="andina-resultados.html?q=${encodeURIComponent(zonaKey)}" onclick="toggleIA()">Ver todas en ${zonaKey.charAt(0).toUpperCase()+zonaKey.slice(1)}</a>`;
-    return `${z.d}\n\n${ps.length?'Propiedades disponibles en esa zona:\n'+propChips(ps)+'\n\n'+verMas:'Consultanos para ver disponibilidad en esa zona.'}`;
+    const zonaLabel=zonaKey.charAt(0).toUpperCase()+zonaKey.slice(1);
+    let intro='';
+    if(match.relaxed && match.ambNum){
+      intro=`<em>No tenemos propiedades de ${match.ambNum} ambientes en ${zonaLabel} en este momento.</em> Estas son las disponibles en la zona:\n`;
+    } else if(ps.length){
+      intro='Propiedades disponibles en esa zona:\n';
+    }
+    return `${z.d}\n\n${ps.length?intro+propChips(ps)+'\n\n'+verMas:'No tenemos disponibilidad en esa zona ahora. '+verMas}`;
   }
   // Zona/barrio genérico
   if(m.includes('zona')||m.includes('barrio')||m.includes('donde')||m.includes('recomiend')){
@@ -1276,7 +1291,7 @@ function buildResponse(msg){
     return '¡Hola! Contame qué propiedad buscás — zona, ambientes, presupuesto. Voy a ayudarte a encontrar las mejores opciones disponibles en Buenos Aires. 🏔️';
   }
   // General
-  const ps=matchProps(msg);
+  const ps=matchProps(msg).list;
   if(ps.length) return `Encontré estas opciones para tu búsqueda:\n${propChips(ps)}\n\n¿Querés afinar la búsqueda por zona o precio?`;
   return `Entiendo lo que buscás. No tenemos coincidencias exactas ahora, pero podemos ayudarte. Contame más — zona, ambientes, presupuesto — y te armamos opciones. También podés <a href="andina-resultados.html">ver todo el catálogo</a>.`;
 }
