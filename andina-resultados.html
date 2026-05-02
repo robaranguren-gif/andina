@@ -584,6 +584,8 @@ const PROPS_DEFAULT = [
   {id:18,titulo:"Departamento 3 ambientes con cochera incluida",title:"Departamento 3 ambientes con cochera incluida",op:"alquiler",tipo:"departamento",type:"departamento",precio:"$750.000 / mes",price:"$750.000 / mes",precioNum:750000,priceNum:750000,zona:"Belgrano, CABA",location:"Belgrano, CABA",amb:3,m2:80,banos:2,source:"Andina",img:"https://images.unsplash.com/photo-1505691723518-36a5ac3be353?w=600&q=80"},
   {id:19,titulo:"Casa 4 ambientes con jardín y quincho",title:"Casa 4 ambientes con jardín y quincho",op:"alquiler",tipo:"casa",type:"casa",precio:"$890.000 / mes",price:"$890.000 / mes",precioNum:890000,priceNum:890000,zona:"Olivos, GBA Norte",location:"Olivos, GBA Norte",amb:4,m2:200,banos:3,source:"Andina",img:"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80"},
   {id:20,titulo:"Departamento 1 ambiente luminoso, piso 8",title:"Departamento 1 ambiente luminoso, piso 8",op:"alquiler",tipo:"departamento",type:"departamento",precio:"$360.000 / mes",price:"$360.000 / mes",precioNum:360000,priceNum:360000,zona:"San Telmo, CABA",location:"San Telmo, CABA",amb:1,m2:35,banos:1,source:"Andina",img:"https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&q=80"},
+  {id:21,titulo:"Departamento 3 ambientes reciclado con patio",title:"Departamento 3 ambientes reciclado con patio",op:"venta",tipo:"departamento",type:"departamento",precio:"USD 145.000",price:"USD 145.000",precioNum:145000,priceNum:145000,zona:"Villa Crespo, CABA",location:"Villa Crespo, CABA",amb:3,m2:88,banos:2,source:"Andina",img:"https://images.unsplash.com/photo-1571508601891-ca5e7a713859?w=600&q=80"},
+  {id:22,titulo:"Departamento 2 ambientes con balcón corrido",title:"Departamento 2 ambientes con balcón corrido",op:"alquiler",tipo:"departamento",type:"departamento",precio:"$480.000 / mes",price:"$480.000 / mes",precioNum:480000,priceNum:480000,zona:"Villa Crespo, CABA",location:"Villa Crespo, CABA",amb:2,m2:58,banos:1,source:"Andina",img:"https://images.unsplash.com/photo-1574362848149-11496d93a7c7?w=600&q=80"},
 ];
 let PROPS=[];
 
@@ -670,7 +672,7 @@ function aplicarFiltros(){
       const stopwords=new Set(["con","los","las","del","que","una","para","por","sin","hay","son","ser","esta","este","ese","esa","muy","mas","pero","como","quiero","busco","necesito","tiene","tene","algo","ambiente","ambientes"]);
       const palabras=zona.split(/\s+/).map(w=>numWords[w]||w).filter(w=>w.length>3&&!stopwords.has(w));
       const camposProp=[p.zona||p.location||"",p.titulo||p.title||"",p.tipo||p.type||"",p.op||""].map(norm).join(" ");
-      const zonaOk=!zona||!palabras.length||palabras.some(w=>camposProp.includes(w));
+      const zonaOk=!zona||!palabras.length||camposProp.includes(zona)||palabras.every(w=>camposProp.includes(w));
       const pAmb=p.amb||p.ambientes||0; const ambOk=currentAmbs.length===0||currentAmbs.some(a=>a>=5?pAmb>=5:pAmb===a);
       const precioOk=(p.precioNum||p.priceNum||0)>=precioMin&&(p.precioNum||p.priceNum||0)<=precioMax;
       const m2Ok=!m2Min||(p.m2||0)>=m2Min;
