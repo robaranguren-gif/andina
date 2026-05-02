@@ -212,10 +212,11 @@
   }
   @media(max-width:480px){
     .hero-sub{font-size:12px;letter-spacing:0.06em;}
-    .ia-fab{bottom:130px;right:16px;}
-    .historial-fab{bottom:68px;right:16px;}
-    .country-btn span.flag ~ *,.country-btn:not(.active){display:none;}
-    .country-switcher .country-btn.active{padding:8px 10px;}
+    .historial-fab{bottom:16px!important;right:16px!important;width:48px!important;height:48px!important;}
+    .ia-fab{bottom:76px!important;right:16px!important;width:48px!important;height:48px!important;}
+    .ia-panel{bottom:76px!important;right:8px!important;width:calc(100vw - 16px)!important;height:70vh!important;max-height:520px!important;}
+    .country-switcher{border-color:rgba(194,155,102,0.3);}
+    .country-btn{padding:10px 18px!important;font-size:11px!important;}
   }
 
   /* POPUP CONTEXTO VOZ */
@@ -1228,6 +1229,14 @@ const CHAT_KB={
     boedo:{d:'Boedo es tranquilo y familiar. Precios más accesibles que barrios linderos con buena calidad de vida.',pv:5},
     'puerto madero':{d:'Puerto Madero es el barrio más premium. Vista al río, edificios de última generación y alta seguridad.',pv:6},
     'san isidro':{d:'San Isidro en GBA Norte ofrece casas con jardín a precios competitivos. Ideal para familias que buscan espacio.',pv:7},
+    recoleta:{d:'Recoleta es un barrio clásico y elegante, con arquitectura europea, museos y las mejores calidades de vida de CABA. Alta demanda y valores estables.',pv:6},
+    nunez:{d:'Núñez es residencial y tranquilo, cercano a Belgrano y al río. Muy buscado por familias.',pv:6},
+    'villa urquiza':{d:'Villa Urquiza es un barrio consolidado, con buena conectividad y ambiente familiar. Buena relación precio-calidad.',pv:6},
+    'san telmo':{d:'San Telmo tiene gran atractivo cultural e histórico. Zona en crecimiento con alta demanda de alquileres.',pv:7},
+    flores:{d:'Flores es uno de los barrios más accesibles de CABA, con excelente conectividad y comercio activo.',pv:5},
+    microcentro:{d:'Microcentro concentra la actividad comercial y de servicios. Ideal para inversión en locales y oficinas.',pv:4},
+    olivos:{d:'Olivos en GBA Norte combina residencialidad con acceso al río. Muy valorado por familias con hijos.',pv:7},
+    martinez:{d:'Martínez en GBA Norte ofrece casas amplias con jardín en countries y barrios cerrados. Premium suburbano.',pv:7},
   }
 };
 
@@ -1309,13 +1318,17 @@ function buildResponse(msg){
   }
   // Alquiler
   if(m.includes('alquil')||m.includes('rentar')){
-    const ps=props.filter(p=>(p.op||'')===('alquiler')).slice(0,3);
-    return `Para alquiler, estas son las opciones disponibles:\n${propChips(ps)}\n\n¿Tenés zona preferida o cantidad de ambientes?`;
+    const match=matchProps(msg);
+    const ps=match.list.length?match.list:props.filter(p=>p.op==='alquiler').slice(0,3);
+    const aviso=match.relaxed&&match.ambNum?`<em>No hay ${match.ambNum} ambientes exactos, pero estas son opciones de alquiler:</em>\n`:'';
+    return `${aviso}Para alquiler:\n${propChips(ps)}\n\n¿Tenés zona preferida o cantidad de ambientes?`;
   }
   // Compra / presupuesto
-  if(m.includes('compr')||m.includes('venta')||/\d{2,}/.test(m)){
-    const ps=props.filter(p=>(p.op||'')===('venta')).slice(0,3);
-    return `Para compra, algunas opciones destacadas:\n${propChips(ps)}\n\n¿Buscás alguna zona o tipo de propiedad específica?`;
+  if(m.includes('compr')||m.includes('venta')){
+    const match=matchProps(msg);
+    const ps=match.list.length?match.list:props.filter(p=>p.op==='venta').slice(0,3);
+    const aviso=match.relaxed&&match.ambNum?`<em>No hay ${match.ambNum} ambientes exactos en esa zona, pero estas son opciones en venta:</em>\n`:'';
+    return `${aviso}Para compra:\n${propChips(ps)}\n\n¿Buscás alguna zona o tipo de propiedad específica?`;
   }
   // Plusvalía
   if(m.includes('plusval')||m.includes('invertir')||m.includes('rentab')){
