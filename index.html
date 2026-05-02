@@ -217,6 +217,8 @@
     .ia-panel{bottom:76px!important;right:8px!important;width:calc(100vw - 16px)!important;height:70vh!important;max-height:520px!important;}
     .country-switcher{border-color:rgba(194,155,102,0.3);}
     .country-btn{padding:10px 18px!important;font-size:11px!important;}
+    .search-btn{padding:0 14px!important;font-size:9px!important;letter-spacing:0.15em!important;}
+    .voice-btn{width:52px!important;flex-shrink:0;}
   }
 
   /* POPUP CONTEXTO VOZ */
@@ -586,7 +588,7 @@
         Trabajamos con compradores, vendedores e inversores que buscan resultados concretos, no promesas.
       </p>
       <div class="stats-grid">
-        <div class="stat-box"><div class="stat-num">CABA</div><div class="stat-label">y Gran Buenos Aires</div></div>
+        <div class="stat-box"><div class="stat-num">48</div><div class="stat-label">barrios en Buenos Aires</div></div>
         <div class="stat-box"><div class="stat-num">Red</div><div class="stat-label">Andina Latinoamérica</div></div>
         <div class="stat-box"><div class="stat-num">Alto</div><div class="stat-label">Valor garantizado</div></div>
         <div class="stat-box"><div class="stat-num">100%</div><div class="stat-label">Compromiso cliente</div></div>
@@ -757,7 +759,7 @@ const PROPS = [
   {id:2,title:"Departamento 3 ambientes a estrenar con cochera",location:"Palermo, CABA",price:"USD 165.000",priceNum:165000,op:"venta",type:"departamento",amb:3,m2:78,banos:2,source:"Argenprop",img:"https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=600&q=80"},
   {id:3,title:"PH 4 ambientes con terraza propia",location:"Villa Crespo, CABA",price:"USD 198.000",priceNum:198000,op:"venta",type:"ph",amb:4,m2:110,banos:2,source:"MercadoLibre",img:"https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=600&q=80"},
   {id:4,title:"Monoambiente premium frente al río",location:"Puerto Madero, CABA",price:"$580.000 / mes",priceNum:580000,op:"alquiler",type:"departamento",amb:1,m2:38,banos:1,source:"ZonaProp",img:"https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=600&q=80"},
-  {id:5,title:"Casa 4 ambientes con jardín y pileta",location:"San Isidro, GBA Norte",price:"USD 320.000",priceNum:320000,op:"venta",type:"casa",amb:4,m2:180,banos:3,source:"Argenprop",img:"https://images.unsplash.com/photo-1598228723793-52759bba239c?w=600&q=80"},
+  {id:5,title:"Casa 4 ambientes con jardín en Saavedra",location:"Saavedra, CABA",price:"USD 295.000",priceNum:295000,op:"venta",type:"casa",amb:4,m2:170,banos:2,source:"Andina",img:"https://images.unsplash.com/photo-1598228723793-52759bba239c?w=600&q=80"},
   {id:6,title:"Departamento 2 ambientes reciclado moderno",location:"Almagro, CABA",price:"$420.000 / mes",priceNum:420000,op:"alquiler",type:"departamento",amb:2,m2:55,banos:1,source:"MercadoLibre",img:"https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=600&q=80"},
   {id:7,title:"Loft moderno con amenities completos",location:"Belgrano, CABA",price:"USD 135.000",priceNum:135000,op:"venta",type:"departamento",amb:2,m2:65,banos:1,source:"ZonaProp",img:"https://images.unsplash.com/photo-1600210492493-0946911123ea?w=600&q=80"},
   {id:8,title:"Local comercial con vidriera céntrica",location:"Microcentro, CABA",price:"$650.000 / mes",priceNum:650000,op:"alquiler",type:"local",amb:0,m2:90,banos:1,source:"Argenprop",img:"https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&q=80"},
@@ -766,12 +768,12 @@ const PROPS = [
   {id:11,title:"Departamento 1 ambiente a estrenar, piso alto",location:"Recoleta, CABA",price:"USD 105.000",priceNum:105000,op:"venta",type:"departamento",amb:1,m2:42,banos:1,source:"ZonaProp",img:"https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600&q=80"},
   {id:12,title:"Departamento 3 ambientes con vista panorámica",location:"Núñez, CABA",price:"USD 178.000",priceNum:178000,op:"venta",type:"departamento",amb:3,m2:85,banos:2,source:"Argenprop",img:"https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600&q=80"},
   {id:13,title:"PH 4 ambientes con terraza y parrilla propia",location:"Caballito, CABA",price:"USD 225.000",priceNum:225000,op:"venta",type:"ph",amb:4,m2:130,banos:2,source:"MercadoLibre",img:"https://images.unsplash.com/photo-1484154218962-a197022b5858?w=600&q=80"},
-  {id:14,title:"Casa 3 ambientes con jardín en country",location:"Martínez, GBA Norte",price:"USD 285.000",priceNum:285000,op:"venta",type:"casa",amb:3,m2:160,banos:2,source:"ZonaProp",img:"https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=600&q=80"},
+  {id:14,title:"Casa 3 ambientes con jardín en Villa Devoto",location:"Villa Devoto, CABA",price:"USD 248.000",priceNum:248000,op:"venta",type:"casa",amb:3,m2:148,banos:2,source:"Andina",img:"https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=600&q=80"},
   {id:15,title:"Departamento 2 ambientes con balcón terraza",location:"Flores, CABA",price:"USD 72.000",priceNum:72000,op:"venta",type:"departamento",amb:2,m2:48,banos:1,source:"Argenprop",img:"https://images.unsplash.com/photo-1574362848149-11496d93a7c7?w=600&q=80"},
   {id:16,title:"Departamento 3 ambientes en edificio premium",location:"Villa Urquiza, CABA",price:"USD 152.000",priceNum:152000,op:"venta",type:"departamento",amb:3,m2:72,banos:2,source:"ZonaProp",img:"https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=600&q=80"},
   {id:17,title:"Departamento 2 ambientes en Palermo Soho",location:"Palermo, CABA",price:"$680.000 / mes",priceNum:680000,op:"alquiler",type:"departamento",amb:2,m2:60,banos:1,source:"ZonaProp",img:"https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600&q=80"},
   {id:18,title:"Departamento 3 ambientes con cochera incluida",location:"Belgrano, CABA",price:"$750.000 / mes",priceNum:750000,op:"alquiler",type:"departamento",amb:3,m2:80,banos:2,source:"Argenprop",img:"https://images.unsplash.com/photo-1505691723518-36a5ac3be353?w=600&q=80"},
-  {id:19,title:"Casa 4 ambientes con jardín y quincho",location:"Olivos, GBA Norte",price:"$890.000 / mes",priceNum:890000,op:"alquiler",type:"casa",amb:4,m2:200,banos:3,source:"MercadoLibre",img:"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80"},
+  {id:19,title:"Casa 4 ambientes con quincho en Coghlan",location:"Coghlan, CABA",price:"$820.000 / mes",priceNum:820000,op:"alquiler",type:"casa",amb:4,m2:185,banos:2,source:"Andina",img:"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80"},
   {id:20,title:"Departamento 1 ambiente luminoso, piso 8",location:"San Telmo, CABA",price:"$360.000 / mes",priceNum:360000,op:"alquiler",type:"departamento",amb:1,m2:35,banos:1,source:"ZonaProp",img:"https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&q=80"},
   {id:21,title:"Departamento 3 ambientes reciclado con patio",location:"Villa Crespo, CABA",price:"USD 145.000",priceNum:145000,op:"venta",type:"departamento",amb:3,m2:88,banos:2,source:"Argenprop",img:"https://images.unsplash.com/photo-1571508601891-ca5e7a713859?w=600&q=80"},
   {id:22,title:"Departamento 2 ambientes con balcón corrido",location:"Villa Crespo, CABA",price:"$480.000 / mes",priceNum:480000,op:"alquiler",type:"departamento",amb:2,m2:58,banos:1,source:"ZonaProp",img:"https://images.unsplash.com/photo-1574362848149-11496d93a7c7?w=600&q=80"},
@@ -1221,22 +1223,55 @@ try{iaMsgsData=JSON.parse(sessionStorage.getItem('andina_ia')||'[]');}catch(e){}
 
 const CHAT_KB={
   zonas:{
-    palermo:{d:'Palermo es uno de los barrios más cotizados. Ideal para jóvenes profesionales y familias. Excelente gastronomía, parques y transporte.',pv:8},
-    caballito:{d:'Caballito es perfecto para familias: tranquilo, céntrico, con parque Rivadavia y buena conectividad. Excelente relación precio-calidad.',pv:6},
+    // ── CABA — todos los barrios oficiales ──────────────────────────────────
+    palermo:{d:'Palermo es uno de los barrios más cotizados de CABA. Ideal para jóvenes profesionales y familias. Excelente gastronomía, parques y transporte.',pv:8},
+    recoleta:{d:'Recoleta es clásica y elegante, con arquitectura europea y los mejores museos de la ciudad. Alta demanda y valores estables.',pv:7},
     belgrano:{d:'Belgrano combina residencialidad con comercio. Muy buscado por familias y profesionales. Alta demanda y buena liquidez.',pv:7},
-    almagro:{d:'Almagro es bohemio y accesible. Buena conectividad y con muchos proyectos culturales. Excelente para primeras compras.',pv:6},
+    'puerto madero':{d:'Puerto Madero es el barrio más premium de CABA. Vista al río, edificios de última generación y alta seguridad.',pv:7},
+    nunez:{d:'Núñez es residencial y tranquilo, limítrofe con Belgrano. Ambiente familiar, cerca del río y buenas escuelas.',pv:7},
+    colegiales:{d:'Colegiales está en pleno auge. Limítrofe con Palermo y Belgrano, con mucho verde, bares y alta demanda de alquileres.',pv:8},
     'villa crespo':{d:'Villa Crespo creció mucho en los últimos años. Limítrofe con Palermo, a mejor precio. Gran potencial de plusvalía.',pv:9},
+    chacarita:{d:'Chacarita es uno de los barrios más buscados por su ambiente bohemio, bares, mercados y excelente conectividad.',pv:8},
+    caballito:{d:'Caballito es perfecto para familias: tranquilo, céntrico, con parque Rivadavia y muy buena conectividad. Excelente relación precio-calidad.',pv:6},
+    almagro:{d:'Almagro es bohemio y accesible. Buena conectividad y proyectos culturales. Excelente opción para primeras compras.',pv:6},
+    'san telmo':{d:'San Telmo tiene gran atractivo cultural e histórico. En crecimiento con alta demanda de alquileres turísticos.',pv:7},
+    'la boca':{d:'La Boca es icónica y con mucho potencial de inversión. Zona en transformación con alta demanda turística.',pv:6},
+    barracas:{d:'Barracas está en pleno proceso de revalorización. Lofts y reciclados con buena relación precio-valor futuro.',pv:7},
+    'parque patricios':{d:'Parque Patricios es el nuevo polo tecnológico de CABA (Distrito Tecnológico). Muy buena conectividad y crecimiento sostenido.',pv:7},
+    'nueva pompeya':{d:'Nueva Pompeya ofrece precios accesibles y está en proceso de revalorización por obras de infraestructura.',pv:5},
     boedo:{d:'Boedo es tranquilo y familiar. Precios más accesibles que barrios linderos con buena calidad de vida.',pv:5},
-    'puerto madero':{d:'Puerto Madero es el barrio más premium. Vista al río, edificios de última generación y alta seguridad.',pv:6},
-    'san isidro':{d:'San Isidro en GBA Norte ofrece casas con jardín a precios competitivos. Ideal para familias que buscan espacio.',pv:7},
-    recoleta:{d:'Recoleta es un barrio clásico y elegante, con arquitectura europea, museos y las mejores calidades de vida de CABA. Alta demanda y valores estables.',pv:6},
-    nunez:{d:'Núñez es residencial y tranquilo, cercano a Belgrano y al río. Muy buscado por familias.',pv:6},
-    'villa urquiza':{d:'Villa Urquiza es un barrio consolidado, con buena conectividad y ambiente familiar. Buena relación precio-calidad.',pv:6},
-    'san telmo':{d:'San Telmo tiene gran atractivo cultural e histórico. Zona en crecimiento con alta demanda de alquileres.',pv:7},
-    flores:{d:'Flores es uno de los barrios más accesibles de CABA, con excelente conectividad y comercio activo.',pv:5},
-    microcentro:{d:'Microcentro concentra la actividad comercial y de servicios. Ideal para inversión en locales y oficinas.',pv:4},
-    olivos:{d:'Olivos en GBA Norte combina residencialidad con acceso al río. Muy valorado por familias con hijos.',pv:7},
-    martinez:{d:'Martínez en GBA Norte ofrece casas amplias con jardín en countries y barrios cerrados. Premium suburbano.',pv:7},
+    'parque chacabuco':{d:'Parque Chacabuco es residencial y familiar, con precios accesibles y buena conectividad hacia el centro.',pv:5},
+    flores:{d:'Flores es uno de los barrios más accesibles y activos de CABA. Excelente conectividad y comercio diverso.',pv:5},
+    floresta:{d:'Floresta es tranquila y familiar, con precios competitivos y buena conectividad por línea A de subte.',pv:5},
+    'villa santa rita':{d:'Villa Santa Rita es un barrio residencial con casas y departamentos a precios accesibles, muy familiar.',pv:5},
+    'villa general mitre':{d:'Villa General Mitre ofrece tranquilidad y precios accesibles, con buenas opciones de casas con jardín.',pv:5},
+    'monte castro':{d:'Monte Castro es un barrio residencial y tranquilo, con buenas opciones para familias a precios competitivos.',pv:4},
+    versalles:{d:'Versalles es uno de los barrios más residenciales y tranquilos del oeste de CABA. Casas con jardín.',pv:4},
+    'villa real':{d:'Villa Real ofrece un ambiente familiar y tranquilo con precios muy accesibles.',pv:4},
+    liniers:{d:'Liniers es un barrio muy activo comercialmente, accesible y con buena conectividad por línea A.',pv:4},
+    mataderos:{d:'Mataderos ofrece casas amplias a precios muy accesibles. Ideal para quienes buscan espacio en CABA.',pv:4},
+    'villa luro':{d:'Villa Luro tiene buena conectividad y precios accesibles, con opciones de casas y departamentos.',pv:4},
+    'villa soldati':{d:'Villa Soldati ofrece las opciones más accesibles de CABA, con proyectos de urbanización en curso.',pv:4},
+    'villa riachuelo':{d:'Villa Riachuelo es accesible y tranquila, con opciones de casas y PH a buenos precios.',pv:4},
+    'parque avellaneda':{d:'Parque Avellaneda es familiar y accesible, con buenos espacios verdes y conectividad.',pv:4},
+    'villa del parque':{d:'Villa del Parque es un barrio residencial consolidado, familiar y con buenas opciones a precio intermedio.',pv:5},
+    'villa devoto':{d:'Villa Devoto es un barrio familiar con casas con jardín, tranquilo y con buena conectividad.',pv:5},
+    'villa pueyrredon':{d:'Villa Pueyrredón es residencial y familiar, con casas y PH a precios intermedios.',pv:5},
+    saavedra:{d:'Saavedra es residencial y tranquila, con casas con jardín y un ambiente muy familiar. Cerca del río.',pv:6},
+    coghlan:{d:'Coghlan es íntimo y residencial, muy buscado por familias. Casas con jardín y ambiente tranquilo.',pv:6},
+    'villa ortuzar':{d:'Villa Ortúzar creció mucho por su cercanía a Palermo y Villa Crespo. Excelente potencial.',pv:7},
+    'la paternal':{d:'La Paternal tiene buena conectividad y precios accesibles. En crecimiento por su cercanía a Chacarita.',pv:6},
+    'villa urquiza':{d:'Villa Urquiza es un barrio consolidado, con buena conectividad y ambiente familiar. Muy buscado.',pv:6},
+    agronomia:{d:'Agronomía es tranquila y verde, con la Ciudad Universitaria y espacios naturales. Precios accesibles.',pv:5},
+    'parque chas':{d:'Parque Chas es pintoresco y exclusivo, con sus calles curvas y ambiente muy tranquilo. Alta demanda.',pv:6},
+    'villa ortúzar':{d:'Villa Ortúzar creció mucho por su cercanía a Palermo y Villa Crespo. Excelente potencial de plusvalía.',pv:7},
+    retiro:{d:'Retiro es un hub de transporte y negocios. Ideal para inversión en oficinas y departamentos ejecutivos.',pv:6},
+    montserrat:{d:'Montserrat es el barrio histórico del centro de CABA. Alta demanda para inversión y airbnb.',pv:5},
+    balvanera:{d:'Balvanera (Once) tiene mucha actividad comercial y buena conectividad. Opciones accesibles de inversión.',pv:5},
+    'san cristobal':{d:'San Cristóbal es un barrio de clase media consolidado, con precios accesibles y buena conectividad.',pv:5},
+    constitucion:{d:'Constitución está en transformación. Zona de inversión con expectativa de revalorización a mediano plazo.',pv:5},
+    microcentro:{d:'Microcentro concentra la actividad comercial y financiera. Ideal para inversión en locales y oficinas.',pv:4},
+    'san nicolas':{d:'San Nicolás incluye el microcentro financiero. Alta demanda de oficinas y departamentos ejecutivos.',pv:5},
   }
 };
 
