@@ -1198,10 +1198,41 @@ function buildResponse(msg){
   const m=msg.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
   const props=typeof PROPS!=='undefined'?PROPS:[];
 
+  const norm=s=>s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+
   function matchProps(q){
+    const qn=norm(q);
+
+    // 1. Detectar cantidad de ambientes: primero dígito antes de "amb", luego palabra número
+    let ambNum=null;
+    const digitAmb=qn.match(/\b(\d+)\s*amb/);
+    if(digitAmb){ ambNum=parseInt(digitAmb[1]); }
+    else {
+      const wordAmb=qn.match(/\b(un|uno|dos|tres|cuatro|cinco|seis|siete)\s+amb/);
+      if(wordAmb){ const wn={un:1,uno:1,dos:2,tres:3,cuatro:4,cinco:5,seis:6,siete:7}; ambNum=wn[wordAmb[1]]; }
+    }
+
+    // 2. Detectar zona (claves de CHAT_KB.zonas)
+    const zonaFound=Object.keys(CHAT_KB.zonas).find(z=>qn.includes(z))||null;
+
+    // 3. Palabras clave (sin stopwords ni términos genéricos de inmobiliaria)
+    const stop=new Set(["ambientes","ambiente","departamento","depto","casa","local","con","los","las","del","que","una","para","por","sin","muy","quiero","busco","tiene","algo","piso","barrio","zona","buscar","necesito"]);
+    const palabras=qn.split(/\s+/).filter(w=>w.length>3&&!stop.has(w)&&!/^\d+$/.test(w));
+
     return props.filter(p=>{
-      const t=[p.title||p.titulo||'',p.location||p.zona||'',p.type||p.tipo||'',p.op||''].join(' ').toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
-      return q.split(/\s+/).filter(w=>w.length>3).some(w=>t.includes(w));
+      const t=norm([p.title||p.titulo||'',p.location||p.zona||'',p.type||p.tipo||'',p.op||''].join(' '));
+
+      // Filtro por zona (AND — obligatorio si se detectó)
+      if(zonaFound && !t.includes(zonaFound)) return false;
+
+      // Filtro por ambientes (AND — obligatorio si se detectó)
+      if(ambNum!==null && p.amb!=null && p.amb!==ambNum) return false;
+
+      // Si algún filtro activo pasó, incluir
+      if(zonaFound||ambNum!==null) return true;
+
+      // Fallback: keyword match excluyendo stopwords
+      return palabras.length===0||palabras.some(w=>t.includes(w));
     }).slice(0,3);
   }
 
@@ -1219,7 +1250,8 @@ function buildResponse(msg){
   if(zonaKey){
     const z=CHAT_KB.zonas[zonaKey];
     const ps=matchProps(msg);
-    return `${z.d}\n\n<strong>📈 Plusvalía estimada:</strong> ${z.pv}% anual.\n\n${ps.length?'Propiedades disponibles en esa zona:\n'+propChips(ps):'Consultanos para ver disponibilidad en esa zona.'}`;
+    const verMas=`<a href="andina-resultados.html?q=${encodeURIComponent(zonaKey)}" onclick="toggleIA()">Ver todas en ${zonaKey.charAt(0).toUpperCase()+zonaKey.slice(1)}</a>`;
+    return `${z.d}\n\n${ps.length?'Propiedades disponibles en esa zona:\n'+propChips(ps)+'\n\n'+verMas:'Consultanos para ver disponibilidad en esa zona.'}`;
   }
   // Zona/barrio genérico
   if(m.includes('zona')||m.includes('barrio')||m.includes('donde')||m.includes('recomiend')){
