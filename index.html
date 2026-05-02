@@ -182,16 +182,40 @@
   @keyframes dotPulse { 0%,80%,100%{transform:scale(0.6);opacity:0.4} 40%{transform:scale(1);opacity:1} }
   @keyframes scrollPulse { 0%,100%{opacity:0.4;transform:scaleY(0.8)} 50%{opacity:1;transform:scaleY(1)} }
 
+  /* HAMBURGER */
+  .nav-hamburger{display:none;flex-direction:column;justify-content:center;gap:5px;background:none;border:none;padding:6px;cursor:pointer;z-index:201;flex-shrink:0;}
+  .nav-hamburger span{display:block;width:22px;height:2px;background:var(--gold);transition:all 0.3s;border-radius:1px;}
+  .nav-hamburger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px);}
+  .nav-hamburger.open span:nth-child(2){opacity:0;transform:translateX(-6px);}
+  .nav-hamburger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px);}
+
   /* RESPONSIVE */
   @media(max-width:900px){
     nav{padding:0 20px;}
-    .nav-links{gap:16px;}
-    .nav-links li:not(:last-child){display:none;}
+    .nav-hamburger{display:flex;}
+    .nav-links{
+      display:none;position:fixed;top:68px;left:0;right:0;bottom:0;
+      background:rgba(14,18,20,0.97);backdrop-filter:blur(12px);
+      flex-direction:column;align-items:center;justify-content:center;
+      gap:32px;z-index:200;
+    }
+    .nav-links.mobile-open{display:flex;}
+    .nav-links li{display:block!important;}
+    .nav-links a{font-size:14px;letter-spacing:0.25em;}
+    .nav-cta{padding:12px 28px;}
+    .country-switcher{margin:0;}
     .hero-content{padding:100px 20px 70px;}
     #propiedades,#nosotros,#contacto{padding:60px 20px;}
     .properties-grid{grid-template-columns:1fr;}
     .nosotros-grid{grid-template-columns:1fr;gap:36px;}
     .modal{padding:30px 22px;}
+  }
+  @media(max-width:480px){
+    .hero-sub{font-size:12px;letter-spacing:0.06em;}
+    .ia-fab{bottom:130px;right:16px;}
+    .historial-fab{bottom:68px;right:16px;}
+    .country-btn span.flag ~ *,.country-btn:not(.active){display:none;}
+    .country-switcher .country-btn.active{padding:8px 10px;}
   }
 
   /* POPUP CONTEXTO VOZ */
@@ -410,10 +434,13 @@
       <span>Real Estate</span>
     </div>
   </div>
-  <ul class="nav-links">
-    <li><a onclick="irAPropiedades()">Propiedades</a></li>
-    <li><a onclick="scrollToSection('nosotros')">Nosotros</a></li>
-    <li><a onclick="scrollToSection('contacto')">Contacto</a></li>
+  <button class="nav-hamburger" id="navHamburger" onclick="toggleMobileNav()" aria-label="Menú">
+    <span></span><span></span><span></span>
+  </button>
+  <ul class="nav-links" id="navLinks">
+    <li><a onclick="irAPropiedades();closeMobileNav()">Propiedades</a></li>
+    <li><a onclick="scrollToSection('nosotros');closeMobileNav()">Nosotros</a></li>
+    <li><a onclick="scrollToSection('contacto');closeMobileNav()">Contacto</a></li>
     <li>
       <div class="country-switcher">
         <span class="country-btn active"><span class="flag">🇦🇷</span> Buenos Aires</span>
@@ -1127,6 +1154,14 @@ document.getElementById('searchInput').addEventListener('keydown',e=>{ if(e.key=
 window.addEventListener('scroll',()=>{ document.getElementById('mainNav').classList.toggle('scrolled',window.scrollY>60); });
 function scrollToSection(id){ document.getElementById(id).scrollIntoView({behavior:'smooth'}); }
 function scrollToTop(){ window.scrollTo({top:0,behavior:'smooth'}); }
+function toggleMobileNav(){
+  document.getElementById('navLinks').classList.toggle('mobile-open');
+  document.getElementById('navHamburger').classList.toggle('open');
+}
+function closeMobileNav(){
+  document.getElementById('navLinks').classList.remove('mobile-open');
+  document.getElementById('navHamburger').classList.remove('open');
+}
 
 // ── MODAL CONTACTO ────────────────────────────────────────────────────────────
 function openContact(propId){
